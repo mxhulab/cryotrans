@@ -1,0 +1,32 @@
+package:
+  name: cryotrans
+  version: 1.0.0
+
+source:
+  path: cryosieve-1.0.0
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install . -vv
+
+requirements:
+  build:
+    - python
+    - pip
+  run:
+    - python >=3.7
+    - numpy >=1.18
+    - mrcfile >=1.4.3
+    - cupy >=10
+    - pytorch >=1.10
+
+test:
+  imports:
+    - cryotrans
+
+about:
+  home: https://github.com/mxhulab/cryotrans
+  license: GPL-3.0
+  license_file: LICENSE
+  summary: 'CryoTRANS: Predicting high-resolution maps of rare conformations using neural ODEs in cryo-EM'
