@@ -10,7 +10,7 @@ from .particles import particles
 from .gridding import Gridding
 
 def parse_args():
-    parser = argparse.ArgumentParser(description = 'CryoTRANS: Quality Preserved Trajectory for Boosting Resolutions of Rare Conformations in cryo-EM.')
+    parser = argparse.ArgumentParser(description = 'CryoTRANS: Predicting high-resolution maps of rare conformations using neural ODEs in cryo-EM.')
 
     basic_group = parser.add_argument_group('Basic arguments.')
     basic_group.add_argument('-i', '--initial-map',       type = str,                      help = 'Path of initial map.')

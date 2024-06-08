@@ -15,7 +15,7 @@ from .wasserstein2_loss import Wasserstein2Loss
 from .tetramesh import tetramesh, MeshLoss
 
 def parse_args():
-    parser = argparse.ArgumentParser(description = 'CryoTRANS: Quality Preserved Trajectory for Boosting Resolutions of Rare Conformations in cryo-EM.')
+    parser = argparse.ArgumentParser(description = 'CryoTRANS: Predicting high-resolution maps of rare conformations using neural ODEs in cryo-EM.')
 
     basic_group = parser.add_argument_group('Basic arguments.')
     basic_group.add_argument('-i0', '--initial-map',       type = str,                     help = 'Path of initial map.')
@@ -56,8 +56,6 @@ def train(
     lr : float = 1e-3,
     mu_mesh : Optional[float] = None,
 ):
-    print('-------------------------Training--------------------------')
-
     rho, xs = particles(a0)
     if mu_mesh is not None:
         mesh = tetramesh(xs, a0.shape[0])
