@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cryotrans"
+version = "1.0.0"
+authors = [
+    { name="Xiao Fan", email="fanx20@mails.tsinghua.edu.cn" },
+    { name="Qi Zhang", email="q-zhang20@mails.tsinghua.edu.cn" },
+    { name="Hui Zhang", email="zhanghui23@mails.tsinghua.edu.cn" },
+    { name="Jianying Zhu", email="zhu-jy20@mails.tsinghua.edu.cn" },
+    { name="Lili Ju", email="ju@math.sc.edu" },
+    { name="Zuoqiang Shi", email="qshi@mail.tsinghua.edu.cn" },
+    { name="Mingxu Hu", email="humingxu@smart.org.cn" },
+    { name="Chenglong Bao", email="clbao@mail.tsinghua.edu.cn" },
+]
+description = "CryoTRANS: Predicting high-resolution maps of rare conformations using neural ODEs in cryo-EM"
+readme = "README.md"
+license = {file = "LICENSE"}
+requires-python = ">=3.7"
+dependencies = [
+    "numpy>=1.18",
+    "mrcfile>=1.4.3",
+    "cupy>=10",
+    "torch>=1.10"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Environment :: GPU :: NVIDIA CUDA",
+    "Topic :: Scientific/Engineering :: Image Processing"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/mxhulab/cryotrans"
+
+[project.scripts]
+"cryotrans-train" = "cryotrans.train:main"
+"cryotrans-predict" = "cryotrans.predict:main"
