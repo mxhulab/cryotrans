@@ -12,7 +12,7 @@ from .gridding import Gridding
 def parse_args():
     parser = argparse.ArgumentParser(description = 'CryoTRANS: Predicting high-resolution maps of rare conformations using neural ODEs in cryo-EM.')
 
-    basic_group = parser.add_argument_group('Basic arguments.')
+    basic_group = parser.add_argument_group('Basic arguments')
     basic_group.add_argument('-i', '--initial-map',       type = str,                      help = 'Path of initial map.')
     basic_group.add_argument('-t', '--initial-threshold', type = float, default = 0.,      help = 'Threshold for the initial map.')
     basic_group.add_argument('-d', '--directory',         type = str,                      help = 'Working directory.')
@@ -20,7 +20,7 @@ def parse_args():
     basic_group.add_argument('-g', '--gpu',               type = int,   default = 0,       help = 'Which gpu to use, 0 by default.')
     basic_group.add_argument('-w', '--weight',            type = str,                      help = 'Path of network weight file as initial model.')
 
-    advanced_group = parser.add_argument_group('Advanced arguments.')
+    advanced_group = parser.add_argument_group('Advanced arguments')
     advanced_group.add_argument('--depth',   type = int,   default = 3,    help = 'Depth of velocity net (MLP).')
     advanced_group.add_argument('--width',   type = int,   default = 100,  help = 'Width of velocity net (MLP).')
 
