@@ -17,7 +17,7 @@ from .tetramesh import tetramesh, MeshLoss
 def parse_args():
     parser = argparse.ArgumentParser(description = 'CryoTRANS: Predicting high-resolution maps of rare conformations using neural ODEs in cryo-EM.')
 
-    basic_group = parser.add_argument_group('Basic arguments.')
+    basic_group = parser.add_argument_group('Basic arguments')
     basic_group.add_argument('-i0', '--initial-map',       type = str,                     help = 'Path of initial map.')
     basic_group.add_argument('-t0', '--initial-threshold', type = float,                   help = 'Threshold for the initial map.')
     basic_group.add_argument('-i1', '--target-map',        type = str,                     help = 'Path of target map.')
@@ -29,7 +29,7 @@ def parse_args():
     basic_group.add_argument('-n',  '--n_steps',           type = int,                     help = 'Number of training steps.')
     basic_group.add_argument('-p',  '--period',            type = int,                     help = 'For periodic report.')
 
-    advanced_group = parser.add_argument_group('Advanced arguments.')
+    advanced_group = parser.add_argument_group('Advanced arguments')
     advanced_group.add_argument('--depth',   type = int,   default = 3,    help = 'Depth of velocity net (MLP).')
     advanced_group.add_argument('--width',   type = int,   default = 100,  help = 'Width of velocity net (MLP).')
     advanced_group.add_argument('--w2_eps',  type = float, default = 1e-4, help = 'Entropic regularisation parameter for W2 loss.')

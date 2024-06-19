@@ -74,7 +74,7 @@ In this tutorial, we will use the protein TmrAB as an example to demonstrate how
 
 ## Prepare the Dataset
 
-We will be working with two conformations of TmrAB at a resolution of 3Å. The files required for this tutorial are `TmrAB_0_3A.mrc` and `TmrAB_1_7A.mrc`. Additionally, we have provided a low-passed density map at 7Å for the second conformation, named `TmrAB_1_7A.mrc`. Our goal is to use the first conformation at 3Å and the second conformation at 7Å to predict a high-resolution density map for the second conformation.
+We will be working with two conformations of TmrAB at resolution of 3Å and 7Å, respectively. The files required for this tutorial are `TmrAB_0_3A.mrc` and `TmrAB_1_7A.mrc`. Our goal is to use the first conformation at 3Å and the second conformation at 7Å to predict a high-resolution density map for the second conformation.
 
 You can directly download the required density maps from the following [link](https://github.com/mxhulab/cryotrans-demos/tree/master/TmrAB). Once downloaded, please place them in a clean working directory. Next, navigate to the working directory and activate the Conda environment by running the following command:
 ```
@@ -85,7 +85,7 @@ Make sure to replace `WORKING_DIR` with the actual path to your working director
 
 ## Train
 
-CryoTRANS enables flexible registration between two cryo-EM density maps using an ODE-governed deformation field parameterized by a deep neural network (DNN). In this process, the initial map corresponds to a high-resolution density map, while the terminal map corresponds to a low-resolution target map. CryoTRANS will deform the initial map with the nueral ODE to a generated map and try to minimize the Wasserstein distance between the generated map and the target map.
+CryoTRANS enables flexible registration between two cryo-EM density maps using an ODE-governed deformation field parameterized by a deep neural network (DNN). In this process, the initial map corresponds to a high-resolution density map, while the terminal map corresponds to a low-resolution target map. CryoTRANS will deform the initial map with the neural ODE to a generated map and try to minimize the Wasserstein distance between the generated map and the target map.
 
 To proceed with the training step, execute the following command:
 ```
@@ -129,6 +129,42 @@ Let's understand the options in this CryoTRANS command:
 
 Similarly, during the prediction step using CryoTRANS, a single GPU card will be utilized. The prediction process typically takes a few seconds to complete. The resulting pseudo-trajectory will consist of a list of density files, named `frame_00.mrc`, `frame_01.mrc`, and so on, up to `frame_10.mrc`, saved in the directory `output`. The last file in the sequence will be the final generated map, which represents the deformed version of the initial map that matches the target map to the best extent possible.
 
+## Advanced technique: L2 refine
+
+When the resolution of the generated map and the target map is very close, and a large portion of the maps overlap in space, one can use L2 loss function instead of squared Wasserstein distance to further refine the results.
+
+To demonstrate this technique, two conformations of TmrAB both at resolution of 3Å are used. The required files, namely `TmrAB_0_3A.mrc` and `TmrAB_1_3A.mrc`, can be downloaded from the following [link](https://github.com/mxhulab/cryotrans-demos/tree/master/TmrAB).
+
+The training process consists of two consecutive steps. In the first step, squared Wasserstein distance is used as the loss function for rough registeration. Then, the the resulting DNN is used as input in the second step, where L2 loss is applied to further refine the DNN. The following commands are used for these steps:
+```
+cryotrans-train -i0 TmrAB_0_3A.mrc -t0 0.24 -i1 TmrAB_1_3A.mrc -t1 0.24 -d output -n 2000 -p 1000
+cryotrans-train -i0 TmrAB_0_3A.mrc -t0 0.24 -i1 TmrAB_1_3A.mrc -t1 0.24 -d output -w output/net.pt -n 15000 -p 1000 --l2 --lr 1e-4
+```
+We note that the `-w` option specifies the previously obtained weight file (`output/net.pt`) as the input initial weight. The flag `--l2` indicates the use L2 loss instead of Wasserstein loss. In addition, `--lr 1e-4` option sets the learning rate to 1e-4, which is more suitable for L2 loss according to our experience.
+
+## Advanced technique: Enlarging the scale of DNN
+
+By default, CryoTRANS utilizes a multi-layer perception (MLP) structure with 2 hidden layers (depth 3), each having a width of 100. However, for datasets with complex velocity fields for deformation, the limited capacity of the DNN may not be sufficient to represent the velocity field accurately. To address this, CryoTRANS provides two hyperparameters, namely the depth and the width of the MLP, to tune the network structure.
+
+As an example, the technique is applied to two conformations of Mm-cpn (chain D) at a resolution of 3Å. The required files, namely `Mm-cpnD_0_3A.mrc` and `Mm-cpnD_1_3A.mrc`, can be downloaded from the following [link](https://github.com/mxhulab/cryotrans-demos/tree/master/Mm-cpn).
+
+The following commands are used for training process:
+```
+cryotrans-train -i0 Mm-cpnD_0_3A.mrc -t0 0.24 -i1 Mm-cpnD_1_3A.mrc -t1 0.24 -d output -n 5000 -p 1000 --width 900
+cryotrans-train -i0 Mm-cpnD_0_3A.mrc -t0 0.24 -i1 Mm-cpnD_1_3A.mrc -t1 0.24 -d output -w output/net.pt -n 50000 -p 1000 --width 900 --l2 --lr 1e-4
+```
+It is important to note that the `--width 900` option is used to enlarge the scale of the MLP by setting its width to 900.
+
+## Guideline: Preventing overfitting
+
+In deep learning, overfitting occurs when a model becomes too specialized to the training data and performs poorly on unseen data. In their community, a common approach to prevent overfitting is to use a validation set to monitor the behavior of the DNN during training. The technique known as "early stopping" is employed, where training is stopped when the performance on the validation set starts to deteriorate.
+
+However, in the case of CryoTRANS, there is no explicit validation set available to determine when to stop the training process. Instead, it is recommended to run the training process for as long as possible and save all intermediate weights periodically. This allows users to experiment with different weight files and explore the generated pseudo-trajectories from these intermediate checkpoints. In some cases, the results obtained from an intermediate weight file may prove to be beneficial, even if the final weight file does not yield satisfactory results.
+
+## Guideline: Multiscale
+
+When the input maps are too large to be processed quickly, CryoTRANS provides an option to utilize binning or downscaling. The command-line argument `-b` or `--binning` is used, following by specifying the level of binning or downscaling. For example, a binning level of 4 or 2 can be set, which means the initial and target maps will be downsampled accordingly.
+
 # Options/Arguments
 
 ## Options/Arguments of `cryotrans-train`
@@ -144,7 +180,7 @@ CryoTRANS: Predicting high-resolution maps of rare conformations using neural OD
 options:
   -h, --help            show this help message and exit
 
-Basic arguments.:
+Basic arguments:
   -i0 INITIAL_MAP, --initial-map INITIAL_MAP
                         Path of initial map.
   -t0 INITIAL_THRESHOLD, --initial-threshold INITIAL_THRESHOLD
@@ -165,7 +201,7 @@ Basic arguments.:
   -p PERIOD, --period PERIOD
                         For periodic report.
 
-Advanced arguments.:
+Advanced arguments:
   --depth DEPTH         Depth of velocity net (MLP).
   --width WIDTH         Width of velocity net (MLP).
   --w2_eps W2_EPS       Entropic regularisation parameter for W2 loss.
@@ -187,7 +223,7 @@ CryoTRANS: Predicting high-resolution maps of rare conformations using neural OD
 options:
   -h, --help            show this help message and exit
 
-Basic arguments.:
+Basic arguments:
   -i INITIAL_MAP, --initial-map INITIAL_MAP
                         Path of initial map.
   -t INITIAL_THRESHOLD, --initial-threshold INITIAL_THRESHOLD
@@ -200,7 +236,7 @@ Basic arguments.:
   -w WEIGHT, --weight WEIGHT
                         Path of network weight file as initial model.
 
-Advanced arguments.:
+Advanced arguments:
   --depth DEPTH         Depth of velocity net (MLP).
   --width WIDTH         Width of velocity net (MLP).
 ```
