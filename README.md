@@ -46,9 +46,9 @@ Please note that this command is tailored for CUDA version 10.2. To accommodate 
 
 For CUDA version >= 11.8:
 ```
-conda create -n CRYOTRANS_ENV python=3.10 cupy=12.0 pytorch pytorch-cuda=12.1 -c pytorch -c nvidia -c conda-forge
+conda create -n CRYOTRANS_ENV python=3.10 cupy=12.0 pytorch=2.2.0 pytorch-cuda=12.1 cuda-version=12.1 -c pytorch -c nvidia -c conda-forge
 ```
-Please note that this command is tailored for CUDA environment version 12.1. For a different CUDA version, adjust `pytorch-cuda` version accordingly.
+Please note that this command is tailored for CUDA environment version 12.1. For a different CUDA version, adjust `pytorch-cuda` and `cuda-version` accordingly.
 
 ## Installing CryoTRANS
 
@@ -56,16 +56,9 @@ After preparing CuPy and PyTorch, it is crucial to activate it before proceeding
 ```
 conda activate CRYOTRANS_ENV
 ```
-
-Then, we turn to the step of installing CryoTRANS. CryoTRANS can be installed either via `pip` or `conda`.
-
-To install CryoTRANS using `pip`, execute the following command:
+Then, we turn to the step of installing CryoTRANS. CryoTRANS can be installed either via `pip`. Execute the following command:
 ```
 pip install cryotrans
-```
-Alternatively, to install CryoTRANS using `conda`, execute the following command:
-```
-conda install -c mxhulab cryotrans
 ```
 
 # Tutorial
